@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:layout_margin="10dp">
+
+    <LinearLayout
+        android:id="@+id/llEdit"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_above="@+id/rlSub">
+
+        <EditText
+            android:id="@+id/edtPostContent"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="top"
+            android:background="@null"/>
+    </LinearLayout>
+
+    <RelativeLayout
+        android:id="@+id/rlSub"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true">
+
+        <Button
+            android:id="@+id/btnPublish"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentRight="true"
+            android:layout_margin="8dp"
+            android:background="#8f5c35"
+            android:text="发布"
+            android:textColor="#f1ece9"
+            android:textSize="18sp" />
+
+    </RelativeLayout>
+
+
+</RelativeLayout>

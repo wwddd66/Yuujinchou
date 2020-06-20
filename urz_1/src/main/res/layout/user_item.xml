@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="5dp"
+    android:orientation="horizontal">
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="5dp">
+
+        <com.example.urz_1.shape.RoundImageView
+            android:id="@+id/rivIcon_item"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:src="@mipmap/l7" />
+    </LinearLayout>
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="10dp"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/tvUsername_item"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="#ff9900" />
+
+        <TextView
+            android:id="@+id/tvNickname_item"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="#444444" />
+    </LinearLayout>
+
+</LinearLayout>

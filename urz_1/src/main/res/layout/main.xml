@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@mipmap/urz1"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:id="@+id/ll1"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="200dp">
+
+        <EditText
+            android:id="@+id/edtUsername"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="30dp"
+            android:layout_marginRight="30dp"
+            android:layout_marginBottom="10dp"
+            android:hint="请输入账号" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/ll2"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/ll1">
+
+        <EditText
+            android:id="@+id/edtPassword"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="30dp"
+            android:layout_marginRight="30dp"
+            android:hint="请输入密码"
+            android:inputType="textPassword" />
+
+    </LinearLayout>
+
+    <RelativeLayout
+        android:id="@+id/rl3"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/ll2"
+        android:layout_marginBottom="20dp">
+
+        <CheckBox
+            android:id="@+id/cbRememberMe"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_marginLeft="30dp"
+            android:text="记住账号" />
+
+        <CheckBox
+            android:id="@+id/cbAutoLogin"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:paddingRight="30dp"
+            android:text="自动登录" />
+
+    </RelativeLayout>
+
+    <LinearLayout
+        android:id="@+id/ll5"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/rl3"
+        android:layout_marginBottom="10dp">
+
+        <Button
+            android:id="@+id/btnLogin"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="30dp"
+            android:layout_marginRight="30dp"
+            android:background="#8f5c35"
+            android:text="登录"
+            android:textColor="#f1ece9"
+            android:textSize="18sp" />
+
+    </LinearLayout>
+
+
+    <RelativeLayout
+        android:id="@+id/rl6"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/ll5">
+
+        <TextView
+            android:id="@+id/tvRegister"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:paddingLeft="30dp"
+            android:text="注册账号" />
+
+        <TextView
+            android:id="@+id/tvForgetPassword"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:paddingRight="30dp"
+            android:text="忘记密码" />
+    </RelativeLayout>
+</RelativeLayout>

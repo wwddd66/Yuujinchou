@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@mipmap/l19"
+    android:orientation="vertical">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="50dp"
+        android:orientation="horizontal">
+
+        <com.example.urz_1.shape.RoundImageView
+            android:id="@+id/rivMineIcon"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:layout_centerInParent="true"
+            android:src="@mipmap/urz7" />
+
+        <TextView
+            android:id="@+id/tvMineNickname"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/rivMineIcon"
+            android:layout_marginTop="@dimen/dp15"
+            android:gravity="center"
+            android:textColor="#c47e29"
+            android:textSize="15sp" />
+
+    </RelativeLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="20dp"
+        android:layout_marginTop="10dp"
+        android:layout_marginRight="20dp"
+        android:orientation="vertical">
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="0.5dp"
+            android:background="#e5e5e5" />
+
+        <TextView
+            android:id="@+id/tvModifyNickname"
+            style="@style/MineTextView"
+            android:layout_width="match_parent"
+            android:text="修改昵称" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="0.5dp"
+            android:background="#e5e5e5" />
+
+        <TextView
+            android:id="@+id/tvModifyIcon"
+            style="@style/MineTextView"
+            android:layout_width="match_parent"
+            android:text="修改头像" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="0.5dp"
+            android:background="#e5e5e5" />
+
+
+        <TextView
+            android:id="@+id/tvModifyPwd"
+            style="@style/MineTextView"
+            android:layout_width="match_parent"
+            android:text="修改密码" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="0.5dp"
+            android:background="#e5e5e5" />
+
+        <TextView
+
+            android:id="@+id/tvSwitchAccount"
+            style="@style/MineTextView"
+            android:layout_width="match_parent"
+            android:text="切换账号" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="0.5dp"
+            android:background="#e5e5e5" />
+    </LinearLayout>
+
+</LinearLayout>
