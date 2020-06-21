@@ -19,6 +19,7 @@ import com.example.urz_1.R;
 import com.example.urz_1.adapter.PostAdapter;
 import com.example.urz_1.model.Post;
 import com.example.urz_1.model.User;
+import com.example.urz_1.model.UserRelation;
 
 import org.litepal.LitePal;
 
@@ -64,11 +65,12 @@ public class HomeFragment extends Fragment {
             currentUsername = bundle.getString(key_username, "username");
         }
 
-        currentUser = LitePal.where("username like ?", currentUsername).find(User.class).get(0);
-        postList.addAll(LitePal.where("user_id like ?", String.valueOf(currentUser.getId())).order("date desc").find(Post.class, true));
+        currentUser = LitePal.where("username like ?", currentUsername).findFirst(User.class);
+        List<UserRelation> relations = LitePal.where("userid like ?", String.valueOf(currentUser.getId())).find(UserRelation.class);
+        //postList.addAll(LitePal.where("user_id like ?", String.valueOf(currentUser.getId())).order("date desc").find(Post.class, true));
         //动态列表（目前只有自己的）
-        for (User user : currentUser.getUserList()) {
-            postList.addAll(LitePal.where("user_id like ?", String.valueOf(user.getId())).order("date desc").find(Post.class, true));
+        for (UserRelation item : relations) {
+            postList.addAll(LitePal.where("user_id like ?", String.valueOf(item.getFriendId())).order("date desc").find(Post.class, true));
         }
         PostAdapter postAdapter = new PostAdapter(postList, currentUsername);
         rvPosts.setAdapter(postAdapter);
@@ -118,14 +120,16 @@ public class HomeFragment extends Fragment {
                     //把post加到数据库
                     Post post = new Post(postContent, dateString, 0, 0, currentUser);
                     post.save();
-
+                    postList = new ArrayList<>();
+//                    postList.addAll(LitePal.where("user_id like ?", String.valueOf(currentUser.getId())).order("date desc").find(Post.class, true));
                     //在ListView中展示出来
                     rvPosts.setLayoutManager(layoutManager);
-
+                    List<UserRelation> userRelations = LitePal.where("userid like ?", String.valueOf(currentUser.getId())).find(UserRelation.class);
 
                     //好友名单（好友的用户名）（...）
-                    for (User item : currentUser.getUserList()) {
-                        postList.addAll(LitePal.where("user_id like ?", String.valueOf(item.getId())).order("date desc").find(Post.class, true));
+                    //动态列表（目前只有自己的）
+                    for (UserRelation relation : userRelations) {
+                        postList.addAll(LitePal.where("user_id like ?", String.valueOf(relation.getFriendId())).order("date desc").find(Post.class, true));
                     }
                     PostAdapter postAdapter = new PostAdapter(postList, currentUsername);
                     rvPosts.setAdapter(postAdapter);

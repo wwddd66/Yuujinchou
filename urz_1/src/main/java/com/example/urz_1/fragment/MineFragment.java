@@ -123,10 +123,11 @@ public class MineFragment extends Fragment {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
                                 if (!"".equals(edt.getText().toString())) {
+                                    user = LitePal.where("username like ?", currentUsername).findFirst(User.class);
                                     String str = edt.getText().toString();
                                     tvMineNickname.setText(str);
                                     user.setNickname(str);
-                                    user.save();
+                                    user.update(user.getId());
                                 }
                             }
                         });
@@ -154,10 +155,10 @@ public class MineFragment extends Fragment {
                 builder.setNegativeButton("取消", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        return;
                     }
                 });
                 AlertDialog dialog = builder.create();
+                dialog.setCancelable(false);
                 dialog.show();
 
             }

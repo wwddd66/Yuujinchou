@@ -12,10 +12,10 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.urz_1.model.User;
+import com.example.urz_1.model.UserRelation;
 
 import org.litepal.LitePal;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -93,10 +93,11 @@ public class RegisterActivity extends AppCompatActivity {
                 user.setNickname(username);//注册时，默认将用户名作为昵称
                 user.setPassword(pwd);
                 user.setEmail(email);
-                List<User> users = new ArrayList<>();
-                users.add(user);
-                user.setUserList(users);
                 user.save();
+                //自己应该是自己的好友
+                UserRelation relation = new UserRelation(user.getId(), user.getId());
+                relation.save();
+
 
                 //返回登陆界面，将账号和密码的值带回
                 intent = new Intent();

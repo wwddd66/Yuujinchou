@@ -17,9 +17,6 @@ import com.example.urz_1.fragment.FindFragment;
 import com.example.urz_1.fragment.HomeFragment;
 import com.example.urz_1.fragment.MineFragment;
 import com.example.urz_1.fragment.NewsFragment;
-import com.example.urz_1.model.User;
-
-import org.litepal.LitePal;
 
 public class LoggedActivity extends AppCompatActivity implements View.OnClickListener {
     //底部的四个导航图片，主页、发现、消息、我的
@@ -30,7 +27,7 @@ public class LoggedActivity extends AppCompatActivity implements View.OnClickLis
     private NewsFragment tabNews;
     private MineFragment tabMine;
 
-    private String currentUsername;
+    private static String currentUsername;
     private Intent intent;
     private Bundle bundle;
     private FragmentManager fragmentManager;
@@ -90,18 +87,17 @@ public class LoggedActivity extends AppCompatActivity implements View.OnClickLis
         switch (v.getId()) {
             case R.id.llHome:
                 ivHome.setImageResource(R.mipmap.home1);
-                //baseFragment.showFragment(0);
                 tabHome = HomeFragment.getInstance(currentUsername);
                 changeFragment(tabHome);
                 break;
             case R.id.llFind:
                 ivFind.setImageResource(R.mipmap.find1);
-                tabFind = new FindFragment();
+                tabFind = FindFragment.getInstance(currentUsername);
                 changeFragment(tabFind);
                 break;
             case R.id.llNews:
                 ivNews.setImageResource(R.mipmap.news1);
-                tabNews = new NewsFragment();
+                tabNews = NewsFragment.getInstance(currentUsername);
                 changeFragment(tabNews);
                 break;
             case R.id.llMine:

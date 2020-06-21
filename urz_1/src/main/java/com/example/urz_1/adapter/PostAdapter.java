@@ -29,16 +29,15 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
     private List<Post> posts;
     private Context mContext;
     private PostViewHolder mHolder;
+    private CommentAdapter mCommentAdapter;
     private User currentUser;//保存当前登录的用户
     private String currentUsername;//保存当前登录的用户
-    private CommentAdapter mCommentAdapter;
 
 
     static class PostViewHolder extends RecyclerView.ViewHolder {
         private final TextView tvLike, tvComment;
         private TextView tvNickName, tvPostContent, tvTime, tvLikes, tvComments;
         private RecyclerView rvComments;
-
 
         public PostViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -72,16 +71,8 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
 
     @Override
     public void onBindViewHolder(@NonNull final PostViewHolder holder, int position) {
-        User user = LitePal.where("username like ?", currentUsername).find(User.class).get(0);
+        currentUser = LitePal.where("username like ?", currentUsername).findFirst(User.class);
         final Post post = posts.get(position);
-        post.setUser(user);
-        if (position == 0) {
-            currentUser = post.getUser();
-        }
-
-        if (post.getUser().getNickname() == null) {
-            post.getUser().setNickname(post.getUser().getUsername());
-        }
         holder.tvNickName.setText(post.getUser().getNickname());
         holder.tvPostContent.setText(post.getContent());
         holder.tvTime.setText(post.getDate());
@@ -92,7 +83,6 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
          * 将int型业务数据，转换成String类型(String.valueOf())即可。
          */
         holder.tvLikes.setText(String.valueOf(post.getLikes()));
-        post.setComments(0);
         holder.tvComments.setText(String.valueOf(post.getComments()));
         //设置子布局
         holder.rvComments.setHasFixedSize(true);

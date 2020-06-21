@@ -9,26 +9,26 @@ public class UserRelation extends LitePalSupport {
      * 多对多关联的实现方式是用中间表
      */
 
-
     private int id;
-    private User user;
-    private User friend;
+    private int userId;//当前登录用户的user.getId()
+    private int friendId;//点击添加好友后的点击事件中的user.getId()
 
-    public void setUser(User user) {
-        this.user = user;
+    public UserRelation() {
     }
 
-    public void setFriend(User friend) {
-        this.friend = friend;
+    public UserRelation(int userId, int friendId) {
+        this.userId = userId;
+        this.friendId = friendId;
     }
 
-    public User getUser() {
-        return user;
+    public int getFriendId() {
+        return friendId;
     }
 
-    public User getFriend() {
-        return friend;
+    public void setFriendId(int friendId) {
+        this.friendId = friendId;
     }
+
 
     public int getId() {
         return id;
@@ -36,5 +36,13 @@ public class UserRelation extends LitePalSupport {
 
     public void setId(int id) {
         this.id = id;
+    }
+
+    public int getUserId() {
+        return userId;
+    }
+
+    public void setUserId(int userId) {
+        this.userId = userId;
     }
 }
