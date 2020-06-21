@@ -15,9 +15,14 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.EditText;
+import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
@@ -27,6 +32,7 @@ import com.example.urz_1.MainActivity;
 import com.example.urz_1.R;
 import com.example.urz_1.RecoverPasswordActivity;
 import com.example.urz_1.model.User;
+import com.example.urz_1.model.UserRelation;
 import com.example.urz_1.shape.RoundImageView;
 import com.zxy.tiny.Tiny;
 import com.zxy.tiny.callback.FileWithBitmapCallback;
@@ -34,6 +40,8 @@ import com.zxy.tiny.callback.FileWithBitmapCallback;
 import org.litepal.LitePal;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -42,6 +50,8 @@ public class MineFragment extends Fragment {
     private RoundImageView rivMineIcon;
     private TextView tvModifyNickname, tvModifyIcon, tvSwitchAccount, tvMineNickname, tvModifyPwd;
     private TextView tvChoosePhoto, tvCancel;
+    private Spinner spinnerViewFriends;
+    private ArrayAdapter<String> adapter;
 
     private static final int MY_ADD_CASE_CALL_PHONE2 = 7;
     private AlertDialog.Builder builder;
@@ -51,7 +61,8 @@ public class MineFragment extends Fragment {
     private static String key_username = "username";
     private String currentUsername;
     private Intent intent;
-    private User user;
+    private User currentUser;
+    private List<UserRelation> userRelations;
 
 
     public MineFragment() {
@@ -77,9 +88,54 @@ public class MineFragment extends Fragment {
             Log.d("error", "MineBundle为空");
         } else {
             currentUsername = bundle.getString(key_username, "username");
-            user = LitePal.where("username like ?", currentUsername).findFirst(User.class);
-            tvMineNickname.setText(user.getNickname());
+            currentUser = LitePal.where("username like ?", currentUsername).findFirst(User.class);
+            tvMineNickname.setText(currentUser.getNickname());
         }
+
+        initFriendList();//初始化好友列表
+        spinnerViewFriends.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                String pos = adapter.getItem(position);
+                if ("请选择:".equals(pos)) {
+
+                } else {
+                    final String _username = pos.split("（", 2)[1].split("）", 2)[0];
+                    AlertDialog.Builder builder = new AlertDialog.Builder(getContext());//提示是否删除的弹出框
+                    builder.setTitle("即将进行的操作")
+                            .setMessage("是否删除该好友(单向删除)")
+                            .setPositiveButton("是", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    User _user = LitePal.where("username like ?", _username).findFirst(User.class, true);
+                                    for (UserRelation item : userRelations) {
+                                        if (_user.getId() == item.getFriendId() && _user.getId() != currentUser.getId()) {
+                                            item.delete();
+                                            initFriendList();
+                                        } else {
+                                            Toast.makeText(getContext(), "我删我自己，哈哈哈。当然不能删除自己啦！", Toast.LENGTH_SHORT).show();
+                                        }
+                                    }
+                                }
+                            })
+                            .setNegativeButton("否", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                }
+                            });
+                    AlertDialog dialog = builder.create();
+                    dialog.setCanceledOnTouchOutside(false);
+                    dialog.show();
+                    parent.setVisibility(View.VISIBLE);
+                }
+
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+                parent.setVisibility(View.VISIBLE);
+            }
+        });
 
 
         //修改头像（未保存至数据库）
@@ -123,11 +179,11 @@ public class MineFragment extends Fragment {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
                                 if (!"".equals(edt.getText().toString())) {
-                                    user = LitePal.where("username like ?", currentUsername).findFirst(User.class);
+                                    currentUser = LitePal.where("username like ?", currentUsername).findFirst(User.class);
                                     String str = edt.getText().toString();
                                     tvMineNickname.setText(str);
-                                    user.setNickname(str);
-                                    user.update(user.getId());
+                                    currentUser.setNickname(str);
+                                    currentUser.update(currentUser.getId());
                                 }
                             }
                         });
@@ -188,6 +244,7 @@ public class MineFragment extends Fragment {
         tvSwitchAccount = getActivity().findViewById(R.id.tvSwitchAccount);
         tvMineNickname = getActivity().findViewById(R.id.tvMineNickname);
         tvModifyPwd = getActivity().findViewById(R.id.tvModifyPwd);
+        spinnerViewFriends = getActivity().findViewById(R.id.spinnerViewFriends);
     }
 
     /**
@@ -207,7 +264,7 @@ public class MineFragment extends Fragment {
      * @param grantResults
      */
     @Override
-    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
 
         if (requestCode == MY_ADD_CASE_CALL_PHONE2) {
             if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
@@ -255,5 +312,25 @@ public class MineFragment extends Fragment {
         File file = new File(outfile);
         // TODO: 这里就可以将图片文件 file 上传到服务器,上传成功后可以将bitmap设置给你对应的图片展示
         rivMineIcon.setImageBitmap(bitmap);
+    }
+
+    void initFriendList() {
+        userRelations = new ArrayList<>();
+        userRelations.addAll(LitePal.where("userid like ?", String.valueOf(currentUser.getId())).find(UserRelation.class));
+        List<User> userList = new ArrayList<>();
+        for (UserRelation item : userRelations) {
+            userList.addAll(LitePal.select("username", "nickname").where("id like ?", String.valueOf(item.getFriendId())).find(User.class));
+        }
+        String[] temp = new String[userList.size() + 1];
+        temp[0] = "请选择:";
+        int i = 1;
+        for (User item : userList) {
+            String temp0 = item.getUsername();
+            String temp1 = item.getNickname();
+            temp[i++] = temp1 + "（" + temp0 + "）";
+        }
+        adapter = new ArrayAdapter<String>(getContext(), android.R.layout.simple_spinner_item, temp);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinnerViewFriends.setAdapter(adapter);
     }
 }

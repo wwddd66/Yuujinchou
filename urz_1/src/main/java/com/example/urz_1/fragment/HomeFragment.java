@@ -72,7 +72,7 @@ public class HomeFragment extends Fragment {
         for (UserRelation item : relations) {
             postList.addAll(LitePal.where("user_id like ?", String.valueOf(item.getFriendId())).order("date desc").find(Post.class, true));
         }
-        PostAdapter postAdapter = new PostAdapter(postList, currentUsername);
+        PostAdapter postAdapter = new PostAdapter(getContext(), postList, currentUsername);
         rvPosts.setAdapter(postAdapter);
         layoutManager = new StaggeredGridLayoutManager(1, StaggeredGridLayoutManager.VERTICAL);
         rvPosts.setLayoutManager(layoutManager);
@@ -123,7 +123,6 @@ public class HomeFragment extends Fragment {
                     postList = new ArrayList<>();
 //                    postList.addAll(LitePal.where("user_id like ?", String.valueOf(currentUser.getId())).order("date desc").find(Post.class, true));
                     //在ListView中展示出来
-                    rvPosts.setLayoutManager(layoutManager);
                     List<UserRelation> userRelations = LitePal.where("userid like ?", String.valueOf(currentUser.getId())).find(UserRelation.class);
 
                     //好友名单（好友的用户名）（...）
@@ -131,8 +130,13 @@ public class HomeFragment extends Fragment {
                     for (UserRelation relation : userRelations) {
                         postList.addAll(LitePal.where("user_id like ?", String.valueOf(relation.getFriendId())).order("date desc").find(Post.class, true));
                     }
-                    PostAdapter postAdapter = new PostAdapter(postList, currentUsername);
+                    List<Post> seqPostList = new ArrayList<>();
+                    for (Post item : postList) {
+                        seqPostList.addAll(LitePal.where("id like ?", String.valueOf(item.getId())).order("date desc").find(Post.class, true));
+                    }
+                    PostAdapter postAdapter = new PostAdapter(getContext(), seqPostList, currentUsername);
                     rvPosts.setAdapter(postAdapter);
+                    rvPosts.setLayoutManager(layoutManager);
                 }
                 break;
         }

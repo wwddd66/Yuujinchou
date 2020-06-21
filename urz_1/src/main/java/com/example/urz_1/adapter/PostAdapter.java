@@ -4,15 +4,16 @@ import android.animation.ObjectAnimator;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.text.SpannableString;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
-import androidx.recyclerview.widget.StaggeredGridLayoutManager;
 
 import com.example.urz_1.R;
 import com.example.urz_1.model.Comment;
@@ -28,8 +29,8 @@ import java.util.List;
 public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder> {
     private List<Post> posts;
     private Context mContext;
-    private PostViewHolder mHolder;
-    private CommentAdapter mCommentAdapter;
+    //private PostViewHolder mHolder;
+    //private CommentAdapter mCommentAdapter;
     private User currentUser;//保存当前登录的用户
     private String currentUsername;//保存当前登录的用户
 
@@ -37,7 +38,16 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
     static class PostViewHolder extends RecyclerView.ViewHolder {
         private final TextView tvLike, tvComment;
         private TextView tvNickName, tvPostContent, tvTime, tvLikes, tvComments;
-        private RecyclerView rvComments;
+        private TextView tvCommentsTest;
+        /*private RecyclerView rvComments;
+        private CommentAdapter commentAdapter;
+        private List<Comment> commentList = new ArrayList<>();
+        private StaggeredGridLayoutManager manager;*/
+
+       /* public void showItem(List<Comment> commentList) {
+            commentAdapter.setData(commentList);
+            rvComments.setAdapter(commentAdapter);
+        }*/
 
         public PostViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -48,13 +58,22 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
             tvLike = itemView.findViewById(R.id.tvLike);//post点赞
             tvComments = itemView.findViewById(R.id.tvComments);//post评论数
             tvComment = itemView.findViewById(R.id.tvComment);//TODO: post评论,绑定监听事件（...）
+            tvCommentsTest = itemView.findViewById(R.id.tvCommentsTest);
             //评论的子布局（嵌套一个子RecyclerView）
-            rvComments = itemView.findViewById(R.id.rvComments);
+            //rvComments = itemView.findViewById(R.id.rvComments);
+            /**
+             * 新添
+             */
+            /*commentAdapter = new CommentAdapter(context);
+            manager = new StaggeredGridLayoutManager(1, StaggeredGridLayoutManager.VERTICAL);
+            rvComments.setLayoutManager(manager);*/
+
 
         }
     }
 
-    public PostAdapter(List<Post> posts, String username) {
+    public PostAdapter(Context context, List<Post> posts, String username) {
+        mContext = context;
         this.posts = posts;
         this.currentUsername = username;
     }
@@ -63,15 +82,13 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
     @Override
     public PostViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.post_item, parent, false);
-        mContext = view.getContext();
-        //PostViewHolder viewHolder = new PostViewHolder(view);
-
-        return new PostViewHolder(view);
+        PostViewHolder viewHolder = new PostViewHolder(view);
+        return viewHolder;
     }
 
     @Override
-    public void onBindViewHolder(@NonNull final PostViewHolder holder, int position) {
-        currentUser = LitePal.where("username like ?", currentUsername).findFirst(User.class);
+    public void onBindViewHolder(@NonNull final PostViewHolder holder, final int position) {
+        currentUser = LitePal.where("username like ?", currentUsername).findFirst(User.class, true);
         final Post post = posts.get(position);
         holder.tvNickName.setText(post.getUser().getNickname());
         holder.tvPostContent.setText(post.getContent());
@@ -84,15 +101,63 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
          */
         holder.tvLikes.setText(String.valueOf(post.getLikes()));
         holder.tvComments.setText(String.valueOf(post.getComments()));
-        //设置子布局
-        holder.rvComments.setHasFixedSize(true);
-        holder.rvComments.setLayoutManager(new StaggeredGridLayoutManager(1, StaggeredGridLayoutManager.VERTICAL));
-        mCommentAdapter = new CommentAdapter(position);
-        holder.rvComments.setAdapter(mCommentAdapter);
-        drawRecyclerView();
+        /*holder.showItem(post.getCommentList());*/
+
+        //评论内容展示
+        List<Comment> commentList = LitePal.where("post_id like ?", String.valueOf(post.getId())).order("comment_date desc").find(Comment.class, true);
+        if (commentList == null) {
+            Toast.makeText(mContext, "没有评论内容", Toast.LENGTH_SHORT).show();
+            return;
+        } else {
+            for (int i = 0; i < commentList.size(); i++) {
+                String commentAuthor = commentList.get(i).getUser().getNickname() + "：";
+                String commentContent = commentList.get(i).getComment_content() + "\n";
+                String commentDate = commentList.get(i).getComment_date() + "\n";
+                if (!holder.tvCommentsTest.getText().toString().equals("")) {
+                    String[] index = {commentAuthor, commentContent, commentDate};
+                    SpannableString msp = new SpannableString(holder.tvCommentsTest.getText().toString() + index[0] + index[1] + index[2]);
+                    holder.tvCommentsTest.setText(msp);
+                } else {
+                    holder.tvCommentsTest.setText(commentAuthor + commentContent + commentDate);
+                }
+
+            }
+        }
+
+        //动态内容点击事件（询问是否删除该动态（当然，只有动态的主人可以删除））
+        holder.tvPostContent.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                final User postUser = LitePal.where("id like ?", String.valueOf(post.getUser().getId())).findFirst(User.class, true);
+                AlertDialog.Builder builder = new AlertDialog.Builder(mContext);//评论的弹出框
+                builder.setTitle("将执行的操作")
+                        .setMessage("是否删除该动态")
+                        .setPositiveButton("删除", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                if (currentUser.getId() == postUser.getId()) {
+                                    post.delete();
+                                    Toast.makeText(mContext, "删除成功", Toast.LENGTH_SHORT).show();
+                                } else {
+                                    Toast.makeText(mContext, "嘿嘿，不是你的动态你还想删除，想得美。" + "\n" + "“那我就是不想看这个，咋办？”" + "\n" + "“你可以删除这个好友，是不是非常的可来碗儿呢？”",
+                                            Toast.LENGTH_LONG).show();
+                                }
+                            }
+                        })
+                        .setNegativeButton("算了，不删了", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                            }
+                        });
+                AlertDialog dialog = builder.create();
+                dialog.setCanceledOnTouchOutside(false);
+                dialog.show();
 
 
-        mHolder = holder;
+            }
+        });
+
+        //mHolder = holder;
         //为动态动态点赞操作
         holder.tvLike.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -119,6 +184,7 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
                             public void onClick(DialogInterface dialogInterface, int i) {
                                 if (!"".equals(edt.getText().toString())) {
                                     post.setComments(post.getComments() + 1);//设置评论数+1
+                                    holder.tvComments.setText(post.getComments() + "");
                                     Comment comment = new Comment();//新建评论的实例
                                     comment.setPost(post);//设置评论所属的动态
                                     comment.setUser(currentUser);//设置评论的用户（即当前登录的用户）
@@ -129,7 +195,7 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
                                     String dateString = formatter.format(date);
                                     comment.setComment_date(dateString);
                                     comment.save();
-                                    post.save();
+                                    post.update(post.getId());
 
                                     //TODO: 将评论显示出来（...）
                                     //通过RecyclerView里嵌套RecyclerView来实现
@@ -147,10 +213,10 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
                         });
                 builder.setView(edt);
                 AlertDialog dialog = builder.create();
+                dialog.setCanceledOnTouchOutside(false);
                 dialog.show();
             }
         });
-
 
     }
 
@@ -159,14 +225,5 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
         return posts.size();
     }
 
-    private void drawRecyclerView() {
-        //RecyclerView点击事件
-        mCommentAdapter.setOnItemClickListener(new CommentAdapter.OnItemClickListener() {
-            @Override
-            public void onItemClick(View v, int position) {
-
-            }
-        });
-    }
 
 }

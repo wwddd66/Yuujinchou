@@ -16,7 +16,7 @@
             android:layout_width="100dp"
             android:layout_height="100dp"
             android:layout_centerInParent="true"
-            android:src="@mipmap/urz7" />
+            android:src="@mipmap/l13" />
 
         <TextView
             android:id="@+id/tvMineNickname"
@@ -41,48 +41,102 @@
         <View
             android:layout_width="match_parent"
             android:layout_height="0.5dp"
-            android:background="#e5e5e5" />
+            android:background="#F3F3F3" />
 
-        <TextView
-            android:id="@+id/tvModifyNickname"
-            style="@style/MineTextView"
+        <LinearLayout
             android:layout_width="match_parent"
-            android:text="修改昵称" />
+            android:layout_height="wrap_content"
+            android:background="#92FFAB40">
+
+            <TextView
+                style="@style/MineTextView"
+                android:layout_width="match_parent"
+                android:layout_weight="1"
+                android:text="好友列表：" />
+
+            <Spinner
+                android:id="@+id/spinnerViewFriends"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1" />
+        </LinearLayout>
+
 
         <View
             android:layout_width="match_parent"
             android:layout_height="0.5dp"
             android:background="#e5e5e5" />
 
-        <TextView
-            android:id="@+id/tvModifyIcon"
-            style="@style/MineTextView"
+        <LinearLayout
+            android:id="@+id/llModifyNickname"
             android:layout_width="match_parent"
-            android:text="修改头像" />
+            android:layout_height="wrap_content"
+            android:background="#65D3FF24">
+
+            <TextView
+                android:id="@+id/tvModifyNickname"
+                style="@style/MineTextView"
+                android:layout_width="match_parent"
+                android:text="修改昵称" />
+        </LinearLayout>
+
 
         <View
             android:layout_width="match_parent"
             android:layout_height="0.5dp"
             android:background="#e5e5e5" />
 
-
-        <TextView
-            android:id="@+id/tvModifyPwd"
-            style="@style/MineTextView"
+        <LinearLayout
+            android:id="@+id/llModifyIcon"
             android:layout_width="match_parent"
-            android:text="修改密码" />
+            android:layout_height="wrap_content"
+            android:background="#51FF0000">
+
+            <TextView
+                android:id="@+id/tvModifyIcon"
+                style="@style/MineTextView"
+                android:layout_width="match_parent"
+                android:text="修改头像" />
+        </LinearLayout>
+
 
         <View
             android:layout_width="match_parent"
             android:layout_height="0.5dp"
             android:background="#e5e5e5" />
 
-        <TextView
-
-            android:id="@+id/tvSwitchAccount"
-            style="@style/MineTextView"
+        <LinearLayout
+            android:id="@+id/llModifyPwd"
             android:layout_width="match_parent"
-            android:text="切换账号" />
+            android:layout_height="wrap_content"
+            android:background="#92FFAB40">
+
+            <TextView
+                android:id="@+id/tvModifyPwd"
+                style="@style/MineTextView"
+                android:layout_width="match_parent"
+                android:text="修改密码" />
+        </LinearLayout>
+
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="0.5dp"
+            android:background="#e5e5e5" />
+
+        <LinearLayout
+            android:id="@+id/llSwitchAccount"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="#65D3FF24">
+
+            <TextView
+                android:id="@+id/tvSwitchAccount"
+                style="@style/MineTextView"
+                android:layout_width="match_parent"
+                android:text="切换账号" />
+        </LinearLayout>
+
 
         <View
             android:layout_width="match_parent"

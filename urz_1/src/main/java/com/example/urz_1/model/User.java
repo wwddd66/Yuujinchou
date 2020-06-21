@@ -8,6 +8,7 @@ import java.util.List;
 
 /**
  * All rights Reserved, Designed By DongWang
+ *
  * @author 王栋
  * @version v1.0
  */
@@ -20,7 +21,8 @@ public class User extends LitePalSupport {
 
 
     private List<Post> postList = new ArrayList<>();//一对多
-    private List<Integer> usersIdList = new ArrayList<>();//存储好友用户的id
+    private List<Comment> commentList = new ArrayList<>();//一对多
+
     /**
      * 曾经尝试过单表关联自己，加入了一个：
      * /*private List<User> userList = new ArrayList<>();//自身多对多
@@ -28,11 +30,10 @@ public class User extends LitePalSupport {
      * 于是新加了一张关系表，里面存放了两个User对象，结果无法查询，添加好友操作时
      * 出现新的问题；
      * 既然这两种方法都解决不了问题，那就只用一个整型数组来保存好友的ID试试，或许行得通；
+     *
      * @serialData
      * @author
-     *
      */
-
 
 
     public List<Post> getPostList() {
@@ -84,11 +85,12 @@ public class User extends LitePalSupport {
         this.id = id;
     }
 
-    public List<Integer> getUsersIdList() {
-        return usersIdList;
+
+    public List<Comment> getCommentList() {
+        return commentList;
     }
 
-    public void setUsersIdList(List<Integer> usersIdList) {
-        this.usersIdList = usersIdList;
+    public void setCommentList(List<Comment> commentList) {
+        this.commentList = commentList;
     }
 }
