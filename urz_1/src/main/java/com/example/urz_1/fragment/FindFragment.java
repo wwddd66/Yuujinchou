@@ -100,6 +100,7 @@ public class FindFragment extends Fragment {
                                 .where("username like ? or nickname like ?", "%" + index + "%", "%" + index + "%")
                                 .find(User.class, true);
                         handler.sendEmptyMessage(1000);
+
                     }
                 }.start();
 

@@ -4,6 +4,7 @@ import android.animation.ObjectAnimator;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.graphics.Bitmap;
 import android.text.SpannableString;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -19,6 +20,7 @@ import com.example.urz_1.R;
 import com.example.urz_1.model.Comment;
 import com.example.urz_1.model.Post;
 import com.example.urz_1.model.User;
+import com.example.urz_1.shape.RoundImageView;
 
 import org.litepal.LitePal;
 
@@ -33,12 +35,14 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
     //private CommentAdapter mCommentAdapter;
     private User currentUser;//保存当前登录的用户
     private String currentUsername;//保存当前登录的用户
+    private Bitmap image;
 
 
     static class PostViewHolder extends RecyclerView.ViewHolder {
         private final TextView tvLike, tvComment;
         private TextView tvNickName, tvPostContent, tvTime, tvLikes, tvComments;
         private TextView tvCommentsTest;
+        private RoundImageView ivAvatar;
         /*private RecyclerView rvComments;
         private CommentAdapter commentAdapter;
         private List<Comment> commentList = new ArrayList<>();
@@ -51,6 +55,7 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
 
         public PostViewHolder(@NonNull View itemView) {
             super(itemView);
+            ivAvatar = itemView.findViewById(R.id.ivAvatar);
             tvNickName = itemView.findViewById(R.id.tvNickName);//post发布者
             tvPostContent = itemView.findViewById(R.id.tvPostContent);//post内容
             tvTime = itemView.findViewById(R.id.tvTime);//post发布时间
@@ -72,10 +77,12 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
         }
     }
 
-    public PostAdapter(Context context, List<Post> posts, String username) {
+
+    public PostAdapter(Context context, List<Post> posts, String username, Bitmap bitmap) {
         mContext = context;
         this.posts = posts;
         this.currentUsername = username;
+        image = bitmap;
     }
 
     @NonNull
@@ -90,6 +97,9 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
     public void onBindViewHolder(@NonNull final PostViewHolder holder, final int position) {
         currentUser = LitePal.where("username like ?", currentUsername).findFirst(User.class, true);
         final Post post = posts.get(position);
+        if (image != null && post.getUser().getId() == currentUser.getId()) {//image不为空且是当前登录的用户，更换头像
+            holder.ivAvatar.setImageBitmap(image);
+        }
         holder.tvNickName.setText(post.getUser().getNickname());
         holder.tvPostContent.setText(post.getContent());
         holder.tvTime.setText(post.getDate());

@@ -2,6 +2,7 @@ package com.example.urz_1.fragment;
 
 
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -24,6 +25,8 @@ import com.example.urz_1.model.UserRelation;
 import org.litepal.LitePal;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 /**
@@ -39,6 +42,7 @@ public class HomeFragment extends Fragment {
     private static String key_username = "username";
 
     private User currentUser;
+    private static Bitmap bitmap;
 
     public HomeFragment() {
         // Required empty public constructor
@@ -50,6 +54,11 @@ public class HomeFragment extends Fragment {
         HomeFragment homeFragment = new HomeFragment();
         homeFragment.setArguments(bundle);
         return homeFragment;
+    }
+
+    //传递头像
+    static void setDate(Bitmap b) {
+        bitmap = b;
     }
 
     @Override
@@ -67,12 +76,18 @@ public class HomeFragment extends Fragment {
 
         currentUser = LitePal.where("username like ?", currentUsername).findFirst(User.class);
         List<UserRelation> relations = LitePal.where("userid like ?", String.valueOf(currentUser.getId())).find(UserRelation.class);
-        //postList.addAll(LitePal.where("user_id like ?", String.valueOf(currentUser.getId())).order("date desc").find(Post.class, true));
-        //动态列表（目前只有自己的）
+        //动态列表
         for (UserRelation item : relations) {
-            postList.addAll(LitePal.where("user_id like ?", String.valueOf(item.getFriendId())).order("date desc").find(Post.class, true));
+            postList.addAll(LitePal.where("user_id like ?", String.valueOf(item.getFriendId())).find(Post.class, true));
         }
-        PostAdapter postAdapter = new PostAdapter(getContext(), postList, currentUsername);
+        //实现Comparable接口，对所有动态进行按时间降序排列
+        Collections.sort(postList, new Comparator<Post>() {
+            @Override
+            public int compare(Post o1, Post o2) {
+                return o2.getDate().compareTo(o1.getDate());
+            }
+        });
+        PostAdapter postAdapter = new PostAdapter(getContext(), postList, currentUsername, bitmap);
         rvPosts.setAdapter(postAdapter);
         layoutManager = new StaggeredGridLayoutManager(1, StaggeredGridLayoutManager.VERTICAL);
         rvPosts.setLayoutManager(layoutManager);
@@ -121,20 +136,23 @@ public class HomeFragment extends Fragment {
                     Post post = new Post(postContent, dateString, 0, 0, currentUser);
                     post.save();
                     postList = new ArrayList<>();
-//                    postList.addAll(LitePal.where("user_id like ?", String.valueOf(currentUser.getId())).order("date desc").find(Post.class, true));
-                    //在ListView中展示出来
+
                     List<UserRelation> userRelations = LitePal.where("userid like ?", String.valueOf(currentUser.getId())).find(UserRelation.class);
 
-                    //好友名单（好友的用户名）（...）
-                    //动态列表（目前只有自己的）
+                    //好友名单（好友的用户名）
+                    //动态列表
                     for (UserRelation relation : userRelations) {
-                        postList.addAll(LitePal.where("user_id like ?", String.valueOf(relation.getFriendId())).order("date desc").find(Post.class, true));
+                        postList.addAll(LitePal.where("user_id like ?", String.valueOf(relation.getFriendId())).find(Post.class, true));
                     }
-                    List<Post> seqPostList = new ArrayList<>();
-                    for (Post item : postList) {
-                        seqPostList.addAll(LitePal.where("id like ?", String.valueOf(item.getId())).order("date desc").find(Post.class, true));
-                    }
-                    PostAdapter postAdapter = new PostAdapter(getContext(), seqPostList, currentUsername);
+
+                    Collections.sort(postList, new Comparator<Post>() {
+                        @Override
+                        public int compare(Post o1, Post o2) {
+                            return o2.getDate().compareTo(o1.getDate());
+                        }
+                    });
+
+                    PostAdapter postAdapter = new PostAdapter(getContext(), postList, currentUsername, bitmap);
                     rvPosts.setAdapter(postAdapter);
                     rvPosts.setLayoutManager(layoutManager);
                 }

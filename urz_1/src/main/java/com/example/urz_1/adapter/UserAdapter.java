@@ -40,7 +40,7 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder
             public void onClick(final View v) {
                 int position = holder.getAdapterPosition();
                 final User user = mUserList.get(position);
-                //TODO: 弹出对话框询问是否将其添加至好友列表（...）
+                //TODO: 弹出对话框询问是否将其添加至好友列表
                 AlertDialog.Builder builder = new AlertDialog.Builder(v.getContext());
                 builder.setTitle("添加好友")
                         .setMessage("是否添加其为好友？对方的好友列表中不会有你。")

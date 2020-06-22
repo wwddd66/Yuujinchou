@@ -44,9 +44,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         //使用LitePal创建数据库urz.db
         SQLiteDatabase db = LitePal.getDatabase();
 
+
         pref = PreferenceManager.getDefaultSharedPreferences(this);
         boolean isRemember = pref.getBoolean("remember_pwd", false);
         boolean isAutoLogin = pref.getBoolean("auto_login", false);
+
+        Intent intentMineFragment = getIntent();
+        boolean auto = intentMineFragment.getBooleanExtra("auto", false);
+        isAutoLogin = auto;
 
         //如果选择了记住密码，下次登录时账号和密码会自动添加
         if (isAutoLogin) {
@@ -61,6 +66,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             for (User user : users) {
                 if (username.equals(user.getUsername()) && pwd.equals(user.getPassword())) {
                     intent = new Intent(MainActivity.this, LoggedActivity.class);
+                    intent.putExtra("username", username);
                     startActivity(intent);
                     finish();
                     break;

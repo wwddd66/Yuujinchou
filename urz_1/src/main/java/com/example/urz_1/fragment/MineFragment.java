@@ -2,15 +2,23 @@ package com.example.urz_1.fragment;
 
 
 import android.Manifest;
-import android.app.Activity;
+import android.annotation.TargetApi;
 import android.app.AlertDialog;
+import android.content.ContentUris;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.database.Cursor;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
+import android.provider.DocumentsContract;
 import android.provider.MediaStore;
+import android.util.Base64;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -22,7 +30,6 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
@@ -34,14 +41,16 @@ import com.example.urz_1.RecoverPasswordActivity;
 import com.example.urz_1.model.User;
 import com.example.urz_1.model.UserRelation;
 import com.example.urz_1.shape.RoundImageView;
-import com.zxy.tiny.Tiny;
-import com.zxy.tiny.callback.FileWithBitmapCallback;
 
 import org.litepal.LitePal;
 
-import java.io.File;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
+
+import static android.app.Activity.RESULT_OK;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -49,20 +58,20 @@ import java.util.List;
 public class MineFragment extends Fragment {
     private RoundImageView rivMineIcon;
     private TextView tvModifyNickname, tvModifyIcon, tvSwitchAccount, tvMineNickname, tvModifyPwd;
-    private TextView tvChoosePhoto, tvCancel;
     private Spinner spinnerViewFriends;
     private ArrayAdapter<String> adapter;
 
-    private static final int MY_ADD_CASE_CALL_PHONE2 = 7;
     private AlertDialog.Builder builder;
-    private AlertDialog dialog;
-    private LayoutInflater inflater;
-    private View layout;
-    private static String key_username = "username";
-    private String currentUsername;
+    private static String key_username = "username";//从LoggedActivity.java传值的key
+    private String currentUsername;//当前登录用户的用户名
     private Intent intent;
-    private User currentUser;
+    private User currentUser;//当前登录用户
     private List<UserRelation> userRelations;
+    private Context mContext;//当前布局的上下文
+
+    public static final int TAKE_PHOTO = 1;
+    public static final int CHOOSE_PHOTO = 2;
+    private Uri imageUri;
 
 
     public MineFragment() {
@@ -81,7 +90,7 @@ public class MineFragment extends Fragment {
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         initView();
-
+        mContext = getContext();
         //获取从 LoggedActivity 传递的username
         Bundle bundle = getArguments();
         if (bundle == null) {
@@ -90,7 +99,10 @@ public class MineFragment extends Fragment {
             currentUsername = bundle.getString(key_username, "username");
             currentUser = LitePal.where("username like ?", currentUsername).findFirst(User.class);
             tvMineNickname.setText(currentUser.getNickname());
+
         }
+        //sharedPreferences = getActivity().getSharedPreferences("bitmap_temp", Context.MODE_PRIVATE);
+        read();//获取头像
 
         initFriendList();//初始化好友列表
         spinnerViewFriends.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
@@ -138,31 +150,15 @@ public class MineFragment extends Fragment {
         });
 
 
-        //修改头像（未保存至数据库）
+        //修改头像
         tvModifyIcon.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                builder = new AlertDialog.Builder(getContext());//创建对话框
-                inflater = getLayoutInflater();
-                layout = inflater.inflate(R.layout.dialog_select_photo, null);//获取自定义布局
-                builder.setView(layout);//设置对话框的布局
-                dialog = builder.create();//生成最终的对话框
-                dialog.show();//显示对话框
-                tvChoosePhoto = layout.findViewById(R.id.photograph);
-                tvCancel = layout.findViewById(R.id.photo);
-
-                //  6.0之后动态申请权限 SD卡写入权限
-                if (ContextCompat.checkSelfPermission(getView().getContext(),
-                        Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-                    ActivityCompat.requestPermissions((Activity) getView().getContext(),
-                            new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
-                            MY_ADD_CASE_CALL_PHONE2);
-
+                if (ContextCompat.checkSelfPermission(getContext(), Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+                    ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
                 } else {
-                    //打开相册
-                    choosePhoto();
+                    openAlbum();
                 }
-                dialog.dismiss();
             }
         });
 
@@ -225,6 +221,7 @@ public class MineFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 intent = new Intent(getActivity(), MainActivity.class);
+                intent.putExtra("auto", false);
                 startActivity(intent);
                 getActivity().finish();
             }
@@ -239,6 +236,7 @@ public class MineFragment extends Fragment {
 
     private void initView() {
         rivMineIcon = getActivity().findViewById(R.id.rivMineIcon);
+        rivMineIcon.setDrawingCacheEnabled(true);
         tvModifyNickname = getActivity().findViewById(R.id.tvModifyNickname);
         tvModifyIcon = getActivity().findViewById(R.id.tvModifyIcon);
         tvSwitchAccount = getActivity().findViewById(R.id.tvSwitchAccount);
@@ -247,72 +245,113 @@ public class MineFragment extends Fragment {
         spinnerViewFriends = getActivity().findViewById(R.id.spinnerViewFriends);
     }
 
-    /**
-     * 打开相册
-     */
-    private void choosePhoto() {
-        //这是打开系统默认的相册(就是你系统怎么分类,就怎么显示,首先展示分类列表)
-        Intent picture = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-        startActivityForResult(picture, 42);
+
+    private void openAlbum() {
+        Intent intent = new Intent("android.intent.action.GET_CONTENT");
+        intent.setType("image/*");
+        startActivityForResult(intent, CHOOSE_PHOTO);//打开相册
     }
 
-    /**
-     * 申请权限回调方法
-     *
-     * @param requestCode
-     * @param permissions
-     * @param grantResults
-     */
     @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-
-        if (requestCode == MY_ADD_CASE_CALL_PHONE2) {
-            if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                choosePhoto();
-            } else {
-                //"权限拒绝";
-                // TODO: 这里可以给用户一个提示,请求权限被拒绝了
-            }
-        }
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-    }
-
-    /**
-     * startActivityForResult执行后的回调方法，接收返回的图片
-     *
-     * @param requestCode
-     * @param resultCode
-     * @param data
-     */
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
         switch (requestCode) {
-            case 42:
-                if (resultCode == Activity.RESULT_OK && null != data) {
+            case 1:
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    openAlbum();
+                } else {
+                    Toast.makeText(getActivity(), "You denied the permission", Toast.LENGTH_SHORT).show();
+                }
+                break;
+            default:
+        }
+    }
+
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        switch (requestCode) {
+            case TAKE_PHOTO:
+                if (resultCode == RESULT_OK) {
                     try {
-                        Uri selectedImage = data.getData();//获取路径
-                        Tiny.FileCompressOptions options = new Tiny.FileCompressOptions();
-                        Tiny.getInstance().source(selectedImage).asFile().withOptions(options).compress(new FileWithBitmapCallback() {
-                            @Override
-                            public void callback(boolean isSuccess, Bitmap bitmap, String outfile, Throwable t) {
-                                saveImageToServer(bitmap, outfile);
-                            }
-                        });
-                    } catch (Exception e) {
-                        //"上传失败";
+                        //将拍摄的照片显示出来
+                        Bitmap bitmap = BitmapFactory.decodeStream(getActivity().getContentResolver().openInputStream(imageUri));
+                        //TODO:
+                        rivMineIcon.setImageBitmap(bitmap);
+                        write(bitmap);
+                    } catch (FileNotFoundException e) {
+                        e.printStackTrace();
                     }
                 }
                 break;
+            case CHOOSE_PHOTO:
+                if (resultCode == RESULT_OK) {
+                    //判断手机系统版本号
+                    if (Build.VERSION.SDK_INT >= 19) {
+                        //4.4及以上系统使用这个方法处理图片
+                        handleImageOnKitkat(data);
+                    } else {
+                        //4.4以下系统使用这个方法处理图片
+                        handleImageBeforeKitKathy(data);
+                    }
+                }
+                break;
+            default:
+                break;
         }
-
     }
 
-    private void saveImageToServer(final Bitmap bitmap, String outfile) {
-        File file = new File(outfile);
-        // TODO: 这里就可以将图片文件 file 上传到服务器,上传成功后可以将bitmap设置给你对应的图片展示
-        rivMineIcon.setImageBitmap(bitmap);
+    @TargetApi(19)
+    private void handleImageOnKitkat(Intent data) {
+        String imagePath = null;
+        Uri uri = data.getData();
+        if (DocumentsContract.isDocumentUri(getActivity(), uri)) {
+            //如果是document 类型Uri，则通过document id 处理
+            String docId = DocumentsContract.getDocumentId(uri);
+            if ("com.android.providers.media.documents".equals(uri.getAuthority())) {
+                String id = docId.split(":")[1];//解析出数字格式的id
+                String selection = MediaStore.Images.Media._ID + "=" + id;
+                imagePath = getImagePath(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, selection);
+            } else if ("com.android.providers.downloads.documents".equals(uri.getAuthority())) {
+                Uri contentUri = ContentUris.withAppendedId(Uri.parse("content://downloads/public_downloads"), Long.valueOf(docId));
+                imagePath = getImagePath(contentUri, null);
+            }
+        } else if ("content".equalsIgnoreCase(uri.getScheme())) {
+            //如果是content类型的Uri ，则使用普通方式处理
+            imagePath = getImagePath(uri, null);
+        } else if ("file".equalsIgnoreCase(uri.getScheme())) {
+            //如果是file类型的Uri，直接使用普通的方式处理
+            imagePath = uri.getPath();
+        }
+        displayImage(imagePath);//根据图片路径显示图片
     }
+
+    private void handleImageBeforeKitKathy(Intent data) {
+        Uri uri = data.getData();
+        String imagePath = getImagePath(uri, null);
+        displayImage(imagePath);
+    }
+
+    private String getImagePath(Uri uri, String selection) {
+        String path = null;
+        //通过Uri和selection来获取真实的图片路径
+        Cursor cursor = getActivity().getContentResolver().query(uri, null, selection, null, null);
+        if (cursor != null) {
+            if (cursor.moveToFirst()) {
+                path = cursor.getString(cursor.getColumnIndex(MediaStore.Images.Media.DATA));
+            }
+            cursor.close();
+        }
+        return path;
+    }
+
+    private void displayImage(String imagePath) {
+        if (imagePath != null) {
+            Bitmap bitmap = BitmapFactory.decodeFile(imagePath);
+            rivMineIcon.setImageBitmap(bitmap);
+            write(bitmap);
+        } else {
+            Toast.makeText(getActivity(), "failed to get image", Toast.LENGTH_SHORT).show();
+        }
+    }
+
 
     void initFriendList() {
         userRelations = new ArrayList<>();
@@ -333,4 +372,36 @@ public class MineFragment extends Fragment {
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinnerViewFriends.setAdapter(adapter);
     }
+
+    //获取头像
+    void read() {
+        SharedPreferences sharedPreferences = getActivity().getSharedPreferences("bitmap_temp", Context.MODE_PRIVATE);
+        // 第一步:取出字符串形式的Bitmap
+        String image = sharedPreferences.getString("image", "");
+        // 第二步:利用Base64将字符串转换为ByteArrayInputStream
+        byte[] byteArray = Base64.decode(image, Base64.DEFAULT);
+        ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(byteArray);
+        // 第三步:利用ByteArrayInputStream生成Bitmap
+        Bitmap bitmap = BitmapFactory.decodeStream(byteArrayInputStream);
+        //显示更新后的头像
+        rivMineIcon.setImageBitmap(bitmap);
+        //把头像传递给HomeFragment同步更新
+        HomeFragment.setDate(bitmap);
+    }
+
+    //保存头像
+    void write(Bitmap bitmap) {
+        // 第一步:将Bitmap压缩至字节数组输出流ByteArrayOutputStream
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        bitmap.compress(Bitmap.CompressFormat.JPEG, 80, byteArrayOutputStream);
+        // 第二步:利用Base64将字节数组输出流中的数据转换成字符串String
+        byte[] byteArray = byteArrayOutputStream.toByteArray();
+        String image = new String(Base64.encodeToString(byteArray, Base64.DEFAULT));
+        // 第三步:将String保持至SharedPreferences
+        SharedPreferences sharedPreferences = getActivity().getSharedPreferences("bitmap_temp", Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putString("image", image);
+        editor.commit();
+    }
+
 }
