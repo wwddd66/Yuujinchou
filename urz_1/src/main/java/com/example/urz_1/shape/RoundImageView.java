@@ -1,5 +1,6 @@
 package com.example.urz_1.shape;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapShader;
@@ -46,7 +47,7 @@ public class RoundImageView extends AppCompatImageView {
         Bitmap bitmap = drawableToBitmap(getDrawable());
 
         //初始化BitmapShader，传入bitmap对象
-        BitmapShader bitmapShader = new BitmapShader(bitmap, Shader.TileMode.CLAMP, Shader.TileMode.CLAMP);
+        @SuppressLint("DrawAllocation") BitmapShader bitmapShader = new BitmapShader(bitmap, Shader.TileMode.CLAMP, Shader.TileMode.CLAMP);
 
         //计算缩放比例
         mScale = (mRadius * 2.0f) / Math.min(bitmap.getHeight(), bitmap.getWidth());

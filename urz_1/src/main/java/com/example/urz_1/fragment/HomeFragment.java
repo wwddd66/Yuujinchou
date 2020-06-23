@@ -42,7 +42,7 @@ public class HomeFragment extends Fragment {
     private static String key_username = "username";
 
     private User currentUser;
-    private static Bitmap bitmap;
+    //private static Bitmap bitmap;
 
     public HomeFragment() {
         // Required empty public constructor
@@ -57,9 +57,9 @@ public class HomeFragment extends Fragment {
     }
 
     //传递头像
-    static void setDate(Bitmap b) {
+/*    static void setDate(Bitmap b) {
         bitmap = b;
-    }
+    }*/
 
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
@@ -87,7 +87,7 @@ public class HomeFragment extends Fragment {
                 return o2.getDate().compareTo(o1.getDate());
             }
         });
-        PostAdapter postAdapter = new PostAdapter(getContext(), postList, currentUsername, bitmap);
+        PostAdapter postAdapter = new PostAdapter(getContext(), postList, currentUsername);
         rvPosts.setAdapter(postAdapter);
         layoutManager = new StaggeredGridLayoutManager(1, StaggeredGridLayoutManager.VERTICAL);
         rvPosts.setLayoutManager(layoutManager);
@@ -152,7 +152,7 @@ public class HomeFragment extends Fragment {
                         }
                     });
 
-                    PostAdapter postAdapter = new PostAdapter(getContext(), postList, currentUsername, bitmap);
+                    PostAdapter postAdapter = new PostAdapter(getContext(), postList, currentUsername);
                     rvPosts.setAdapter(postAdapter);
                     rvPosts.setLayoutManager(layoutManager);
                 }

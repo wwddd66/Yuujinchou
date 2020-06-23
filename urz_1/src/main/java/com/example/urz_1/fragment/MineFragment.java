@@ -8,7 +8,6 @@ import android.content.ContentUris;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.Bitmap;
@@ -18,7 +17,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.provider.DocumentsContract;
 import android.provider.MediaStore;
-import android.util.Base64;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -41,11 +39,10 @@ import com.example.urz_1.RecoverPasswordActivity;
 import com.example.urz_1.model.User;
 import com.example.urz_1.model.UserRelation;
 import com.example.urz_1.shape.RoundImageView;
+import com.example.urz_1.util.FileUtil;
 
 import org.litepal.LitePal;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
@@ -101,7 +98,7 @@ public class MineFragment extends Fragment {
             tvMineNickname.setText(currentUser.getNickname());
 
         }
-        //sharedPreferences = getActivity().getSharedPreferences("bitmap_temp", Context.MODE_PRIVATE);
+
         read();//获取头像
 
         initFriendList();//初始化好友列表
@@ -109,9 +106,7 @@ public class MineFragment extends Fragment {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 String pos = adapter.getItem(position);
-                if ("请选择:".equals(pos)) {
-
-                } else {
+                if (!"请选择:".equals(pos)) {
                     final String _username = pos.split("（", 2)[1].split("）", 2)[0];
                     AlertDialog.Builder builder = new AlertDialog.Builder(getContext());//提示是否删除的弹出框
                     builder.setTitle("即将进行的操作")
@@ -221,7 +216,7 @@ public class MineFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 intent = new Intent(getActivity(), MainActivity.class);
-                intent.putExtra("auto", false);
+                intent.putExtra("auto", "1000");
                 startActivity(intent);
                 getActivity().finish();
             }
@@ -353,7 +348,7 @@ public class MineFragment extends Fragment {
     }
 
 
-    void initFriendList() {
+    private void initFriendList() {
         userRelations = new ArrayList<>();
         userRelations.addAll(LitePal.where("userid like ?", String.valueOf(currentUser.getId())).find(UserRelation.class));
         List<User> userList = new ArrayList<>();
@@ -374,34 +369,32 @@ public class MineFragment extends Fragment {
     }
 
     //获取头像
-    void read() {
-        SharedPreferences sharedPreferences = getActivity().getSharedPreferences("bitmap_temp", Context.MODE_PRIVATE);
-        // 第一步:取出字符串形式的Bitmap
-        String image = sharedPreferences.getString("image", "");
-        // 第二步:利用Base64将字符串转换为ByteArrayInputStream
-        byte[] byteArray = Base64.decode(image, Base64.DEFAULT);
-        ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(byteArray);
-        // 第三步:利用ByteArrayInputStream生成Bitmap
-        Bitmap bitmap = BitmapFactory.decodeStream(byteArrayInputStream);
-        //显示更新后的头像
-        rivMineIcon.setImageBitmap(bitmap);
-        //把头像传递给HomeFragment同步更新
-        HomeFragment.setDate(bitmap);
+    private void read() {
+        String image = currentUser.getImage();
+        if (image == null) {//当前用户无头像
+            /**
+             * 设置默认头像
+             */
+            Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.mipmap.l7);
+            String imageString = FileUtil.bitmapToString(bitmap);
+            // 将String保持至数据库
+            currentUser.setImage(imageString);
+            currentUser.update(currentUser.getId());
+            //显示头像
+            rivMineIcon.setImageBitmap(bitmap);
+        } else {
+            Bitmap bitmap = FileUtil.stringToBitmap(image);
+            rivMineIcon.setImageBitmap(bitmap);//显示更新后的头像
+        }
+
     }
 
     //保存头像
-    void write(Bitmap bitmap) {
-        // 第一步:将Bitmap压缩至字节数组输出流ByteArrayOutputStream
-        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-        bitmap.compress(Bitmap.CompressFormat.JPEG, 80, byteArrayOutputStream);
-        // 第二步:利用Base64将字节数组输出流中的数据转换成字符串String
-        byte[] byteArray = byteArrayOutputStream.toByteArray();
-        String image = new String(Base64.encodeToString(byteArray, Base64.DEFAULT));
-        // 第三步:将String保持至SharedPreferences
-        SharedPreferences sharedPreferences = getActivity().getSharedPreferences("bitmap_temp", Context.MODE_PRIVATE);
-        SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.putString("image", image);
-        editor.commit();
+    private void write(Bitmap bitmap) {
+        String image = FileUtil.bitmapToString(bitmap);
+        // 第三步:将String保持至数据库
+        currentUser.setImage(image);
+        currentUser.update(currentUser.getId());
     }
 
 }

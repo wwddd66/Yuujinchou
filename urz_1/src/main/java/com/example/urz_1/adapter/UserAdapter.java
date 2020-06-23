@@ -1,7 +1,10 @@
 package com.example.urz_1.adapter;
 
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.DialogInterface;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,6 +18,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.urz_1.R;
 import com.example.urz_1.model.User;
 import com.example.urz_1.model.UserRelation;
+import com.example.urz_1.util.FileUtil;
 
 import org.litepal.LitePal;
 
@@ -24,6 +28,7 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder
     private List<User> mUserList;
     private User currentUser;//当前登录的用户
     private String currentUsername;
+    private Context mContext;
 
     public UserAdapter(List<User> userList, String username) {
         mUserList = userList;
@@ -35,6 +40,8 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder
     public UserViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         final View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.user_item, parent, false);
         final UserViewHolder holder = new UserViewHolder(view);
+        mContext = view.getContext();
+
         holder.userView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(final View v) {
@@ -95,8 +102,16 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder
 
     @Override
     public void onBindViewHolder(@NonNull UserViewHolder holder, int position) {
-        User user = mUserList.get(position);
-        holder.rivIcon_item.setImageResource(R.mipmap.l3);
+        final User user = mUserList.get(position);
+        if (user.getImage() == null) {
+            holder.rivIcon_item.setImageResource(R.mipmap.l7);
+            Bitmap bitmap = BitmapFactory.decodeResource(mContext.getResources(), R.mipmap.l7);
+            user.setImage(FileUtil.bitmapToString(bitmap));
+            user.update(user.getId());
+        } else {
+            holder.rivIcon_item.setImageBitmap(FileUtil.stringToBitmap(user.getImage()));
+        }
+
         holder.tvUsername_item.setText(user.getUsername());
         holder.tvNickname_item.setText(user.getNickname());
     }

@@ -96,7 +96,7 @@ public class FindFragment extends Fragment {
                     @Override
                     public void run() {
                         super.run();
-                        userList = (List<User>) LitePal.select("username", "nickname")
+                        userList = (List<User>) LitePal.select("username", "nickname", "image")
                                 .where("username like ? or nickname like ?", "%" + index + "%", "%" + index + "%")
                                 .find(User.class, true);
                         handler.sendEmptyMessage(1000);

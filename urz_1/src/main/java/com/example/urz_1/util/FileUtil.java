@@ -4,15 +4,53 @@ import android.annotation.SuppressLint;
 import android.content.ContentUris;
 import android.content.Context;
 import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
 import android.provider.DocumentsContract;
 import android.provider.MediaStore;
+import android.util.Base64;
+
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 
 public class FileUtil {
+
+    /**
+     * 将字符串转化成Bitmap格式
+     *
+     * @param stringBitmap
+     * @return
+     */
+    public static Bitmap stringToBitmap(String stringBitmap) {
+        // 第一步:取出字符串形式的Bitmap
+        // 第二步:利用Base64将字符串转换为ByteArrayInputStream
+        byte[] byteArray = Base64.decode(stringBitmap, Base64.DEFAULT);
+        ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(byteArray);
+        // 第三步:利用ByteArrayInputStream生成Bitmap
+        return BitmapFactory.decodeStream(byteArrayInputStream);
+    }
+
+    /**
+     * 把Bitmap转换成String格式
+     *
+     * @param bitmap
+     * @return
+     */
+    public static String bitmapToString(Bitmap bitmap) {
+        // 第一步:将Bitmap压缩至字节数组输出流ByteArrayOutputStream
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        bitmap.compress(Bitmap.CompressFormat.JPEG, 80, byteArrayOutputStream);
+        // 第二步:利用Base64将字节数组输出流中的数据转换成字符串String
+        byte[] byteArray = byteArrayOutputStream.toByteArray();
+        return Base64.encodeToString(byteArray, Base64.DEFAULT);
+    }
+
     /**
      * 根据URI获取文件真实路径（兼容多张机型）
+     *
      * @param context
      * @param uri
      * @return
@@ -67,7 +105,7 @@ public class FileUtil {
             } else if (isDownloadsDocument(uri)) { // DownloadsProvider
                 Uri contentUri = ContentUris.withAppendedId(Uri.parse("content://downloads/public_downloads"), Long.valueOf(documentId));
                 filePath = getDataColumn(context, contentUri, null, null);
-            }else if (isExternalStorageDocument(uri)) {
+            } else if (isExternalStorageDocument(uri)) {
                 // ExternalStorageProvider
                 final String docId = DocumentsContract.getDocumentId(uri);
                 final String[] split = docId.split(":");
@@ -75,7 +113,7 @@ public class FileUtil {
                 if ("primary".equalsIgnoreCase(type)) {
                     filePath = Environment.getExternalStorageDirectory() + "/" + split[1];
                 }
-            }else {
+            } else {
                 //Log.e("路径错误");
             }
         } else if ("content".equalsIgnoreCase(uri.getScheme())) {

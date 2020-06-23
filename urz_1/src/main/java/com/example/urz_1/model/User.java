@@ -18,11 +18,9 @@ public class User extends LitePalSupport {
     private String nickname;//昵称，默认为用户名
     private String password;//密码，NOT NULL
     private String email;//邮箱，NOT NULL
-
-
+    private String image;//头像，把头像进行压缩编码成字符串存储
     private List<Post> postList = new ArrayList<>();//一对多
     private List<Comment> commentList = new ArrayList<>();//一对多
-
     /**
      * 曾经尝试过单表关联自己，加入了一个：
      * /*private List<User> userList = new ArrayList<>();//自身多对多
@@ -35,6 +33,13 @@ public class User extends LitePalSupport {
      * @author
      */
 
+    public String getImage() {
+        return image;
+    }
+
+    public void setImage(String image) {
+        this.image = image;
+    }
 
     public List<Post> getPostList() {
         return postList;

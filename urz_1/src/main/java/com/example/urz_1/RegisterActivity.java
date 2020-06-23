@@ -1,6 +1,8 @@
 package com.example.urz_1;
 
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.view.View;
 import android.view.Window;
@@ -13,6 +15,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.urz_1.model.User;
 import com.example.urz_1.model.UserRelation;
+import com.example.urz_1.util.FileUtil;
 
 import org.litepal.LitePal;
 
@@ -93,6 +96,14 @@ public class RegisterActivity extends AppCompatActivity {
                 user.setNickname(username);//注册时，默认将用户名作为昵称
                 user.setPassword(pwd);
                 user.setEmail(email);
+                /**
+                 * 保存默认头像
+                 */
+                // 获取资源文件转换成bitmap
+                Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.mipmap.l7);
+                String imageString = FileUtil.bitmapToString(bitmap);
+                user.setImage(imageString);
+                //保存user
                 user.save();
                 //自己应该是自己的好友
                 UserRelation relation = new UserRelation(user.getId(), user.getId());

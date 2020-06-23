@@ -50,8 +50,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         boolean isAutoLogin = pref.getBoolean("auto_login", false);
 
         Intent intentMineFragment = getIntent();
-        boolean auto = intentMineFragment.getBooleanExtra("auto", false);
-        isAutoLogin = auto;
+        String auto = intentMineFragment.getStringExtra("auto");
+        if (auto != null && auto.equals("1000")) {
+            isAutoLogin = false;
+        }
 
         //如果选择了记住密码，下次登录时账号和密码会自动添加
         if (isAutoLogin) {

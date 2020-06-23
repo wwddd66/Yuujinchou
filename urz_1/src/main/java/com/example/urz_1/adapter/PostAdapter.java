@@ -5,7 +5,9 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.text.SpannableString;
+import android.util.Base64;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,9 +23,11 @@ import com.example.urz_1.model.Comment;
 import com.example.urz_1.model.Post;
 import com.example.urz_1.model.User;
 import com.example.urz_1.shape.RoundImageView;
+import com.example.urz_1.util.FileUtil;
 
 import org.litepal.LitePal;
 
+import java.io.ByteArrayInputStream;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
@@ -35,7 +39,6 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
     //private CommentAdapter mCommentAdapter;
     private User currentUser;//保存当前登录的用户
     private String currentUsername;//保存当前登录的用户
-    private Bitmap image;
 
 
     static class PostViewHolder extends RecyclerView.ViewHolder {
@@ -78,11 +81,10 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
     }
 
 
-    public PostAdapter(Context context, List<Post> posts, String username, Bitmap bitmap) {
+    public PostAdapter(Context context, List<Post> posts, String username) {
         mContext = context;
         this.posts = posts;
         this.currentUsername = username;
-        image = bitmap;
     }
 
     @NonNull
@@ -97,8 +99,14 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
     public void onBindViewHolder(@NonNull final PostViewHolder holder, final int position) {
         currentUser = LitePal.where("username like ?", currentUsername).findFirst(User.class, true);
         final Post post = posts.get(position);
-        if (image != null && post.getUser().getId() == currentUser.getId()) {//image不为空且是当前登录的用户，更换头像
-            holder.ivAvatar.setImageBitmap(image);
+        if (post.getUser().getImage() == null) {//当前该动态作者的image为空
+            holder.ivAvatar.setImageResource(R.mipmap.l7);
+            Bitmap bitmap = BitmapFactory.decodeResource(mContext.getResources(), R.mipmap.l7);
+            post.getUser().setImage(FileUtil.bitmapToString(bitmap));
+            post.getUser().update(post.getUser().getId());//更新user
+            post.update(post.getId());//更新post
+        } else {//当前该动态作者的image不为空
+            holder.ivAvatar.setImageBitmap(FileUtil.stringToBitmap(post.getUser().getImage()));
         }
         holder.tvNickName.setText(post.getUser().getNickname());
         holder.tvPostContent.setText(post.getContent());
@@ -111,7 +119,7 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
          */
         holder.tvLikes.setText(String.valueOf(post.getLikes()));
         holder.tvComments.setText(String.valueOf(post.getComments()));
-        /*holder.showItem(post.getCommentList());*/
+
 
         //评论内容展示
         List<Comment> commentList = LitePal.where("post_id like ?", String.valueOf(post.getId())).order("comment_date desc").find(Comment.class, true);
@@ -234,6 +242,5 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
     public int getItemCount() {
         return posts.size();
     }
-
 
 }
