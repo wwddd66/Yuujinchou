@@ -12,8 +12,8 @@
 
         <com.example.urz_1.shape.RoundImageView
             android:id="@+id/rivIcon_item"
-            android:layout_width="30dp"
-            android:layout_height="30dp"
+            android:layout_width="45dp"
+            android:layout_height="45dp"
             android:src="@mipmap/l7" />
     </LinearLayout>
 
@@ -21,20 +21,24 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginStart="10dp"
         android:layout_marginLeft="10dp"
+        android:layout_marginTop="5dp"
         android:orientation="vertical">
 
         <TextView
             android:id="@+id/tvUsername_item"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textColor="#ff9900" />
+            android:textColor="#ff9900"
+            android:textSize="18sp" />
 
         <TextView
             android:id="@+id/tvNickname_item"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textColor="#444444" />
+            android:textColor="#444444"
+            android:textSize="15sp" />
     </LinearLayout>
 
 </LinearLayout>

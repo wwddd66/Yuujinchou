@@ -109,7 +109,7 @@ public class FindFragment extends Fragment {
 
     }
 
-    void initView() {
+    private void initView() {
         btnFind = getActivity().findViewById(R.id.btnFind);
         edtIndex = getActivity().findViewById(R.id.edtIndex);
         rvUser = getActivity().findViewById(R.id.rvUser);

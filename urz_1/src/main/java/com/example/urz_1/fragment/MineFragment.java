@@ -21,7 +21,6 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.Spinner;
@@ -44,7 +43,6 @@ import com.example.urz_1.util.FileUtil;
 import org.litepal.LitePal;
 
 import java.io.FileNotFoundException;
-import java.util.ArrayList;
 import java.util.List;
 
 import static android.app.Activity.RESULT_OK;
@@ -55,8 +53,8 @@ import static android.app.Activity.RESULT_OK;
 public class MineFragment extends Fragment {
     private RoundImageView rivMineIcon;
     private TextView tvModifyNickname, tvModifyIcon, tvSwitchAccount, tvMineNickname, tvModifyPwd;
-    private Spinner spinnerViewFriends;
-    private ArrayAdapter<String> adapter;
+    /*private Spinner spinnerViewFriends;
+    private ArrayAdapter<String> adapter;*/
 
     private AlertDialog.Builder builder;
     private static String key_username = "username";//从LoggedActivity.java传值的key
@@ -75,6 +73,12 @@ public class MineFragment extends Fragment {
         // Required empty public constructor
     }
 
+    /**
+     * 用来传值，从LoggedActivity获取实例的静态方法
+     *
+     * @param username
+     * @return
+     */
     public static MineFragment getInstance(String username) {
         Bundle bundle = new Bundle();
         bundle.putString(key_username, username);
@@ -101,8 +105,12 @@ public class MineFragment extends Fragment {
 
         read();//获取头像
 
-        initFriendList();//初始化好友列表
-        spinnerViewFriends.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+        /*initFriendList();//初始化好友列表*/
+
+        /**
+         * 好友列表
+         */
+       /* spinnerViewFriends.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 String pos = adapter.getItem(position);
@@ -142,10 +150,12 @@ public class MineFragment extends Fragment {
             public void onNothingSelected(AdapterView<?> parent) {
                 parent.setVisibility(View.VISIBLE);
             }
-        });
+        });*/
 
 
-        //修改头像
+        /**
+         * 修改头像
+         */
         tvModifyIcon.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -157,7 +167,9 @@ public class MineFragment extends Fragment {
             }
         });
 
-        //修改昵称
+        /**
+         * 修改昵称
+         */
         tvModifyNickname.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -183,7 +195,9 @@ public class MineFragment extends Fragment {
             }
         });
 
-        //修改密码
+        /**
+         * 修改密码
+         */
         tvModifyPwd.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -211,7 +225,9 @@ public class MineFragment extends Fragment {
             }
         });
 
-        //切换账号（退出到登陆界面重新选择账号登录）
+        /**
+         * 切换账号（退出到登陆界面重新选择账号登录）
+         */
         tvSwitchAccount.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -229,6 +245,9 @@ public class MineFragment extends Fragment {
         return inflater.inflate(R.layout.mine, container, false);
     }
 
+    /**
+     * 初始化组件
+     */
     private void initView() {
         rivMineIcon = getActivity().findViewById(R.id.rivMineIcon);
         rivMineIcon.setDrawingCacheEnabled(true);
@@ -237,16 +256,25 @@ public class MineFragment extends Fragment {
         tvSwitchAccount = getActivity().findViewById(R.id.tvSwitchAccount);
         tvMineNickname = getActivity().findViewById(R.id.tvMineNickname);
         tvModifyPwd = getActivity().findViewById(R.id.tvModifyPwd);
-        spinnerViewFriends = getActivity().findViewById(R.id.spinnerViewFriends);
+        //spinnerViewFriends = getActivity().findViewById(R.id.spinnerViewFriends);
     }
 
-
+    /**
+     * 打开相册
+     */
     private void openAlbum() {
         Intent intent = new Intent("android.intent.action.GET_CONTENT");
         intent.setType("image/*");
         startActivityForResult(intent, CHOOSE_PHOTO);//打开相册
     }
 
+    /**
+     * 请求权限
+     *
+     * @param requestCode
+     * @param permissions
+     * @param grantResults
+     */
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
         switch (requestCode) {
@@ -261,6 +289,13 @@ public class MineFragment extends Fragment {
         }
     }
 
+    /**
+     * 处理选择图片的返回值
+     *
+     * @param requestCode
+     * @param resultCode
+     * @param data
+     */
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         switch (requestCode) {
             case TAKE_PHOTO:
@@ -324,6 +359,14 @@ public class MineFragment extends Fragment {
         displayImage(imagePath);
     }
 
+
+    /**
+     * 获取图片路径
+     *
+     * @param uri
+     * @param selection
+     * @return
+     */
     private String getImagePath(Uri uri, String selection) {
         String path = null;
         //通过Uri和selection来获取真实的图片路径
@@ -337,6 +380,11 @@ public class MineFragment extends Fragment {
         return path;
     }
 
+    /**
+     * 显示更换后的头像
+     *
+     * @param imagePath
+     */
     private void displayImage(String imagePath) {
         if (imagePath != null) {
             Bitmap bitmap = BitmapFactory.decodeFile(imagePath);
@@ -347,8 +395,10 @@ public class MineFragment extends Fragment {
         }
     }
 
-
-    private void initFriendList() {
+    /**
+     * 初始化好友列表
+     */
+   /* private void initFriendList() {
         userRelations = new ArrayList<>();
         userRelations.addAll(LitePal.where("userid like ?", String.valueOf(currentUser.getId())).find(UserRelation.class));
         List<User> userList = new ArrayList<>();
@@ -366,9 +416,11 @@ public class MineFragment extends Fragment {
         adapter = new ArrayAdapter<String>(getContext(), android.R.layout.simple_spinner_item, temp);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinnerViewFriends.setAdapter(adapter);
-    }
+    }*/
 
-    //获取头像
+    /**
+     * 获取头像
+     */
     private void read() {
         String image = currentUser.getImage();
         if (image == null) {//当前用户无头像
@@ -389,7 +441,11 @@ public class MineFragment extends Fragment {
 
     }
 
-    //保存头像
+    /**
+     * 保存头像
+     *
+     * @param bitmap
+     */
     private void write(Bitmap bitmap) {
         String image = FileUtil.bitmapToString(bitmap);
         // 第三步:将String保持至数据库

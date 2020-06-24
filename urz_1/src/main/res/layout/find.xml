@@ -30,6 +30,14 @@
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_margin="5dp"
+        android:text="Tips: 不输入任何信息直接查询，可以查看全部用户噢~"
+        android:textColor="#aaa"
+        android:textSize="15sp" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
         android:layout_margin="10dp"
         android:text="查询到的结果如下："
         android:textColor="#000"

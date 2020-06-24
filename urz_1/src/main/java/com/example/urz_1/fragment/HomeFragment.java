@@ -119,7 +119,7 @@ public class HomeFragment extends Fragment {
     }
 
 
-    void initView() {
+    private void initView() {
         ivBack = getActivity().findViewById(R.id.ivBack);
         ivAddPost = getActivity().findViewById(R.id.ivAddPost);
         rvPosts = getActivity().findViewById(R.id.rvPosts);

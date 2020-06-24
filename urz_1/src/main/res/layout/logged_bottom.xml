@@ -78,7 +78,7 @@
             android:layout_gravity="center"
             android:layout_weight="1"
             android:gravity="center"
-            android:text="消息"
+            android:text="联系人"
             android:textSize="12sp" />
 
     </LinearLayout>

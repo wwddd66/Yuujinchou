@@ -13,23 +13,37 @@
 
         <com.example.urz_1.shape.RoundImageView
             android:id="@+id/ivAvatar"
-            android:layout_width="30dp"
-            android:layout_height="30dp"
+            android:layout_width="45dp"
+            android:layout_height="45dp"
             android:scaleType="centerCrop"
             android:src="@mipmap/urz7" />
 
-        <TextView
-            android:id="@+id/tvNickName"
-            android:layout_width="wrap_content"
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginStart="10dp"
-            android:layout_marginLeft="10dp"
-            android:layout_marginTop="3dp"
             android:layout_toEndOf="@+id/ivAvatar"
             android:layout_toRightOf="@+id/ivAvatar"
-            android:textColor="#ff9900"
-            android:textSize="15sp"
-            android:textStyle="bold" />
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/tvNickName"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="10dp"
+                android:layout_marginLeft="10dp"
+                android:layout_marginTop="3dp"
+                android:textColor="#ff9900"
+                android:textSize="15sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/tvTime"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="10dp"
+                android:layout_marginLeft="10dp" />
+        </LinearLayout>
+
 
     </RelativeLayout>
 
@@ -37,8 +51,8 @@
         android:id="@+id/tvPostContent"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginStart="40dp"
-        android:layout_marginLeft="40dp"
+        android:layout_marginStart="55dp"
+        android:layout_marginLeft="55dp"
         android:layout_marginEnd="15dp"
         android:layout_marginRight="15dp"
         android:textColor="#000"
@@ -54,11 +68,11 @@
         android:layout_marginRight="15dp"
         android:orientation="horizontal">
 
-        <TextView
+        <!--<TextView
             android:id="@+id/tvTime"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical" />
+            android:layout_gravity="center_vertical" />-->
     </LinearLayout>
 
     <LinearLayout
@@ -121,8 +135,8 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginStart="40dp"
-        android:layout_marginLeft="40dp"
+        android:layout_marginStart="55dp"
+        android:layout_marginLeft="55dp"
         android:layout_marginTop="3dp"
         android:layout_marginEnd="15dp"
         android:layout_marginRight="15dp"

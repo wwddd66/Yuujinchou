@@ -60,6 +60,10 @@ public class LoggedActivity extends AppCompatActivity implements View.OnClickLis
         FindFragment findFragment = FindFragment.getInstance(currentUsername);
         setFragment(findFragment);
 
+        //把username传递给NewsFragment
+        NewsFragment newsFragment = NewsFragment.getInstance(currentUsername);
+        setFragment(newsFragment);
+
 
         //四个导航的监听事件
         llHome.setOnClickListener(this);
